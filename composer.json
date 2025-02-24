@@ -1,5 +1,5 @@
 {
-    "name": "jackal/try-on",
+    "name": "caraxes/try-on",
     "description": "A Laravel package for try-on processing.",
     "type": "library",
     "license": "MIT",

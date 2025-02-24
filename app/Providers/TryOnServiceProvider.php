@@ -21,7 +21,7 @@ class TryOnServiceProvider extends ServiceProvider
             __DIR__ . '/../../config/try-on.php' => config_path('try-on.php'),
         ], 'config');
         
-        $this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
+        // $this->loadRoutesFrom(__DIR__ . '/../Routes/api.php');
         $this->loadMigrationsFrom(__DIR__ . '/../Database/migrations');
     }
 }

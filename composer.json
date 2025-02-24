@@ -1,0 +1,21 @@
+{
+    "name": "jackal/try-on",
+    "description": "A Laravel package for try-on processing.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "TryOn\\": "app/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "TryOn\\Providers\\TryOnServiceProvider"
+            ]
+        }
+    },
+    "require": {},
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

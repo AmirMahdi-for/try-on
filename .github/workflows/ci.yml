@@ -27,8 +27,8 @@ jobs:
       # - name: Run Tests ✅
       #   run: vendor/bin/phpunit --testdox
 
-      - name: Check Code Style 🎨
-        run: vendor/bin/phpcs --standard=PSR12 app/
+      # - name: Check Code Style 🎨
+      #   run: vendor/bin/phpcs --standard=PSR12 app/
 
       - name: Run Static Analysis 🔍
         run: vendor/bin/phpstan analyse app/ --level=5

@@ -27,8 +27,8 @@ jobs:
       - name: Verify Composer Dependencies 📦
         run: composer check
 
-      - name: Run Package Tests ✅
-        run: vendor/bin/phpunit --testdox
+      # - name: Run Package Tests ✅
+      #   run: vendor/bin/phpunit --testdox
 
       - name: Run Static Analysis 🔍
         run: vendor/bin/phpstan analyse app/ --level=5

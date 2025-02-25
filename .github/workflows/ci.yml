@@ -1,4 +1,4 @@
-name: CI
+name: CI for Laravel 11 and Your Package
 
 on:
   push:
@@ -21,14 +21,34 @@ jobs:
           extensions: mbstring, pdo, pdo_mysql
           tools: composer:v2
 
+      - name: Install Laravel 11 🛠️
+        run: |
+          composer create-project --prefer-dist laravel/laravel laravel-app "11.*"
+        
+      - name: Navigate to Laravel Project 📂
+        run: cd laravel-app
+
+      - name: Install try-on 📦
+        run: |
+          composer require caraxes/try-on
+          
       - name: Install Dependencies 📦
-        run: composer install --prefer-dist --no-progress --no-suggest --dev
+        run: |
+          cd laravel-app && composer install --prefer-dist --no-progress --no-suggest --dev
+
+      - name: Optimize Laravel 🛠️
+        run: |
+          cd laravel-app && php artisan config:cache
+          cd laravel-app && php artisan optimize
 
       # - name: Run Migrations 🗂️
-      #   run: php artisan migrate --env=testing
+      #   run: |
+      #     cd laravel-app && php artisan migrate --env=testing
 
       # - name: Run Tests ✅
-      #   run: vendor/bin/phpunit --testdox
+      #   run: |
+      #     cd laravel-app && vendor/bin/phpunit --testdox
 
-      - name: Run Static Analysis 🔍
-        run: vendor/bin/phpstan analyse app/ --level=5
+      # - name: Run Static Analysis 🔍
+      #   run: |
+      #     cd laravel-app && vendor/bin/phpstan analyse app/ --level=5

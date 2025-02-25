@@ -22,13 +22,15 @@ jobs:
           tools: composer:v2
 
       - name: Install Dependencies 📦
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress --no-suggest --dev
 
-      # - name: Run Tests ✅
-      #   run: vendor/bin/phpunit --testdox
+      - name: Optimize Laravel 🛠️
+        run: |
+          php artisan config:cache
+          php artisan optimize
 
-      # - name: Check Code Style 🎨
-      #   run: vendor/bin/phpcs --standard=PSR12 app/
+      - name: Run Migrations 🗂️
+        run: php artisan migrate --env=testing
 
       - name: Run Static Analysis 🔍
         run: vendor/bin/phpstan analyse app/ --level=5

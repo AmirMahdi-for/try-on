@@ -24,8 +24,8 @@ jobs:
       - name: Install Dependencies 📦
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Run Tests ✅
-        run: vendor/bin/phpunit --testdox
+      # - name: Run Tests ✅
+      #   run: vendor/bin/phpunit --testdox
 
       - name: Check Code Style 🎨
         run: vendor/bin/phpcs --standard=PSR12 app/

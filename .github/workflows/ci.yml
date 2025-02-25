@@ -28,9 +28,9 @@ jobs:
       - name: Navigate to Laravel Project 📂
         run: cd laravel-app
 
-      - name: Install try-on 📦
-        run: |
-          composer require caraxes/try-on
+      # - name: Install try-on 📦
+      #   run: |
+      #     composer require caraxes/try-on:dev-main
           
       - name: Install Dependencies 📦
         run: |

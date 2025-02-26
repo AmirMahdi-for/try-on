@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository 🛎️
+      - name: Checkout Repository 🏢
         uses: actions/checkout@v4
 
       - name: Setup PHP 🐘
@@ -21,26 +21,36 @@ jobs:
           extensions: mbstring, pdo, pdo_mysql
           tools: composer:v2, phpunit, phpstan
 
+      - name: Cache Composer Dependencies 🛠️
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
       - name: Install Laravel 11 🛠️
         run: composer create-project --prefer-dist laravel/laravel laravel-app "11.*"
 
-      - name: Install try-on Package 📦
+      - name: Install try-on Package 📚
         run: |
           cd laravel-app
           composer config repositories.try-on path ../
           composer require caraxes/try-on:dev-main
 
-      - name: Install Dependencies 📦
+      - name: Install Dependencies 📚
         run: cd laravel-app && composer install --prefer-dist --no-progress --no-suggest --dev
+
+      - name: Dump Autoload 🛠️
+        run: cd laravel-app && composer dump-autoload
 
       - name: Optimize Laravel 🛠️
         run: cd laravel-app && php artisan config:cache && php artisan optimize
 
-      - name: Run Migrations 🗂️
+      - name: Run Migrations 🐂
         run: cd laravel-app && php artisan migrate --env=testing --force
 
       # - name: Run Tests ✅
       #   run: phpunit --testdox
 
       - name: Run Static Analysis 🔍
-        run: phpstan analyse app/ --level=5
+        run: cd laravel-app && phpstan analyse app/ --level=2

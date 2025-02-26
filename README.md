@@ -7,7 +7,7 @@ Welcome to the **Try-On Laravel Package**! 🚀 This package allows you to proce
 You can install the package via Composer:
 
 ```sh
-composer require jackal/try-on
+composer require caraxes/try-on
 ```
 
 Then, publish the configuration file:

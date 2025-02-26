@@ -1,4 +1,4 @@
-name: CI for Laravel 11 and Your Package
+name: CI for Laravel 11 and TRY-ON
 
 on:
   push:

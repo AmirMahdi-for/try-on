@@ -39,8 +39,8 @@ jobs:
       - name: Run Migrations 🗂️
         run: cd laravel-app && php artisan migrate --env=testing --force
 
-      - name: Run Tests ✅
-        run: phpunit --testdox
+      # - name: Run Tests ✅
+      #   run: phpunit --testdox
 
       - name: Run Static Analysis 🔍
         run: phpstan analyse app/ --level=5

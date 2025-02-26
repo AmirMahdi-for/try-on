@@ -19,36 +19,28 @@ jobs:
         with:
           php-version: "8.2"
           extensions: mbstring, pdo, pdo_mysql
-          tools: composer:v2
+          tools: composer:v2, phpunit, phpstan
 
       - name: Install Laravel 11 🛠️
-        run: |
-          composer create-project --prefer-dist laravel/laravel laravel-app "11.*"
-        
-      - name: Navigate to Laravel Project 📂
-        run: cd laravel-app
+        run: composer create-project --prefer-dist laravel/laravel laravel-app "11.*"
 
-      # - name: Install try-on 📦
-      #   run: |
-      #     composer require caraxes/try-on:dev-main
-          
-      - name: Install Dependencies 📦
+      - name: Install try-on Package 📦
         run: |
-          cd laravel-app && composer install --prefer-dist --no-progress --no-suggest --dev
+          cd laravel-app
+          composer config repositories.try-on path ../
+          composer require caraxes/try-on:dev-main
+
+      - name: Install Dependencies 📦
+        run: cd laravel-app && composer install --prefer-dist --no-progress --no-suggest --dev
 
       - name: Optimize Laravel 🛠️
-        run: |
-          cd laravel-app && php artisan config:cache
-          cd laravel-app && php artisan optimize
+        run: cd laravel-app && php artisan config:cache && php artisan optimize
 
-      # - name: Run Migrations 🗂️
-      #   run: |
-      #     cd laravel-app && php artisan migrate --env=testing
+      - name: Run Migrations 🗂️
+        run: cd laravel-app && php artisan migrate --env=testing --force
 
-      # - name: Run Tests ✅
-      #   run: |
-      #     cd laravel-app && vendor/bin/phpunit --testdox
+      - name: Run Tests ✅
+        run: phpunit --testdox
 
-      # - name: Run Static Analysis 🔍
-      #   run: |
-      #     cd laravel-app && vendor/bin/phpstan analyse app/ --level=5
+      - name: Run Static Analysis 🔍
+        run: phpstan analyse app/ --level=5

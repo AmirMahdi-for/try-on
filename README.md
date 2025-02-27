@@ -62,6 +62,19 @@ print_r($result);
 ✅ Retrieves and tracks the try-on process status  
 ✅ Stores results in the database asynchronously  
 
+## 🏗 Running Migrations
+
+```bash
+php artisan migrate
+```
+
+## 🏗 Queue Processing
+To handle speech recognition requests asynchronously:
+
+```bash
+php artisan queue:work
+```
+
 ## 📜 License
 
 This package is open-source and licensed under the **MIT License**. 🎉

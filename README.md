@@ -69,3 +69,6 @@ This package is open-source and licensed under the **MIT License**. 🎉
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to submit issues or pull requests. Let's make virtual try-ons better together! 💡
+
+## 📞 Support
+For support, please open an issue on GitHub or contact me personally via email at **amirmahdifor@gmail.com**.

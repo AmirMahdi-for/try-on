@@ -1,6 +1,10 @@
-# 🎯 Try-On Laravel Package
+# 🎭 Try-On Laravel Package
 
 Welcome to the **Try-On Laravel Package**! 🚀 This package allows you to process virtual try-on requests with ease using external services.
+
+## ⚠️ Prerequisite
+
+This package relies on the **Fal.AI Try-On API** ([Fal.AI Try-On](https://fal.ai/models/fashn/tryon/api)) for processing virtual try-on requests. To use this package, you must have access to the Fal.AI API. Please ensure you have registered for an API key and have the necessary credentials before proceeding with the installation.
 
 ## 📦 Installation
 
@@ -26,6 +30,8 @@ CATEGORY_IDENTIFIER_TOKEN=<your_token>
 TRY_ON_SERVICE_TOKEN=<your_token>
 TRY_ON_SERVICE_API=<your_api_url>
 ```
+
+Ensure that the `TRY_ON_SERVICE_API` variable points to the **Fal.AI Try-On API**.
 
 ## 🚀 Usage
 
@@ -57,10 +63,10 @@ print_r($result);
 ```
 
 ## 🛠️ Features
-👉 Classifies clothing into categories (tops, bottoms, one-pieces)  
-👉 Sends images for virtual try-on processing  
-👉 Retrieves and tracks the try-on process status  
-👉 Stores results in the database asynchronously  
+✅ Classifies clothing into categories (tops, bottoms, one-pieces)  
+✅ Sends images for virtual try-on processing  
+✅ Retrieves and tracks the try-on process status  
+✅ Stores results in the database asynchronously  
 
 ## 🏗 Running Migrations
 
@@ -69,52 +75,13 @@ php artisan migrate
 ```
 
 ## 🏗 Queue Processing
-To handle try-on requests asynchronously:
+To handle speech recognition requests asynchronously:
 
 ```bash
 php artisan queue:work
 ```
 
-## 🔬 Running Tests
-
-You can run the package tests using:
-
-```sh
-php artisan test
-```
-
-## ⚡ Continuous Integration (CI/CD)
-
-This package uses **GitHub Actions** to ensure code quality and compatibility with **Laravel 11**.  
-The workflow (`.github/workflows/ci.yml`) includes the following steps:
-
-1. **Checkout Repository** 🏢  
-   Pulls the latest code from the repository.  
-
-2. **Setup PHP Environment** 🐘  
-   Installs PHP 8.2 along with required extensions and tools.  
-
-3. **Cache Dependencies** 🛠️  
-   Caches Composer dependencies for faster builds.  
-
-4. **Install Laravel 11** 🏠  
-   Installs a fresh Laravel 11 project to test the package.  
-
-5. **Install Try-On Package** 📚  
-   Configures Composer to load the `try-on` package from the local repository.  
-
-6. **Optimize Laravel** ⚡  
-   Runs `config:cache` and `optimize` for better performance.  
-
-7. **Run Migrations** 💜  
-   Applies database migrations to prepare the environment for testing.  
-
-8. **Run Static Analysis** 🔍  
-   Runs PHPStan to check for potential issues in the codebase.  
-
-The workflow is triggered on **push** and **pull request** events for `main` and `develop` branches.  
-
-## 🐟 License
+## 📜 License
 
 This package is open-source and licensed under the **MIT License**. 🎉
 

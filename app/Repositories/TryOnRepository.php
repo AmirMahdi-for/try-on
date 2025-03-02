@@ -2,52 +2,33 @@
 
 namespace TryOn\Repositories;
 
-use App\Jobs\CreateTryOnDataJob;
-use App\Jobs\UpdateTryOnDataJob;
+
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use TryOn\Http\Requests\VoiceFileRequest;
+use App\Jobs\CreateTryOnDataJob;
+use App\Jobs\UpdateTryOnDataJob;
 use TryOn\Repositories\Interfaces\TryOnRepositoryInterface;
 
 class TryOnRepository implements TryOnRepositoryInterface
 {
     public function __construct() {
-        $this->categoryIdentifierApi = config('try-on.cateogry-indetifier-api');
-        $this->cateogryIndetifierToken = config('try-on.cateogry-indetifier-token');    
+        $this->categoryIdentifierApi = config('try-on.category-identifier-api');
+        $this->categoryIdentifierToken = config('try-on.category-identifier-token');    
         $this->tryOnServiceToken = config('try-on.try-on-token');
         $this->tryOnServiceApi = config('try-on.try-on-api');
     }
 
-    public function getCategory(string $productName)
-    {
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->cateogryIndetifierToken,
-                'Content-Type' => 'application/json',
-            ])->post($this->cateogryIndetifierToken, [
-                'model' => 'gpt-4o-mini',
-                'messages' => [
-                [
-                    'role' => 'system',
-                    'content' => "You are an AI assistant that categorizes clothing items into one of three categories: 'tops', 'bottoms', or 'one-pieces'. Only return one of these three words as the response."
-                ],
-                [
-                    'role' => 'user',
-                    'content' => "Classify the clothing item: '$productName'"
-                ]
-                ]
-            ]);
-
-            return $response->json()['choices'][0]['message']['content'];
-
-        } catch (\Exception $e) {
-            Log::error("Error in getCategory: " . $e->getMessage());
-            return "unknown";
-        }
-    }
-
+    /**
+    * Process try-on for a user with given parameters.
+    *
+    * @param int $userId
+    * @param array $parameters
+    * @return mixed
+    */
     public function tryOn(int $userId, array $parameters)
     {
         try {
@@ -57,23 +38,17 @@ class TryOnRepository implements TryOnRepositoryInterface
             $garmentFile = File::where('url', $parameters['message']['productImage'])->first();
             
             if (!$modelFile) {
-                $modelFile = File::create([
-                "user_id" => $userId,
-                "url"     => $parameters['message']['image'],
-                "format"  => pathinfo(parse_url($parameters['message']['image'], PHP_URL_PATH), PATHINFO_EXTENSION),
-                "type"    => 'image',
-                "size"    => null,
-                ]);
+                $modelFile = File::updateOrCreate(
+                    ['url' => $parameters['message']['image'], 'user_id' => $userId],
+                    ['format' => pathinfo(parse_url($parameters['message']['image'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
+                );
             }
 
             if (!$garmentFile) {
-                $garmentFile = File::create([
-                "user_id" => $userId,
-                "url"     => $parameters['message']['productImage'],
-                "format"  => pathinfo(parse_url($parameters['message']['productImage'], PHP_URL_PATH), PATHINFO_EXTENSION),
-                "type"    => 'image',
-                "size"    => null,
-                ]);
+                $garmentFile = File::updateOrCreate(
+                    ['url' => $parameters['message']['productImage'], 'user_id' => $userId],
+                    ['format' => pathinfo(parse_url($parameters['message']['productImage'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
+                );
             }
 
             $response = Http::withHeaders([
@@ -117,6 +92,40 @@ class TryOnRepository implements TryOnRepositoryInterface
         } catch (\Exception $e) {
             Log::error("Error in tryOn method: " . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+    * Retrieve category for a given product name.
+    *
+    * @param string $productName
+    * @return string
+    */
+    public function getCategory(string $productName)
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->categoryIdentifierToken,
+                'Content-Type' => 'application/json',
+            ])->post($this->categoryIdentifierApi, [
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => "You are an AI assistant that categorizes clothing items into one of three categories: 'tops', 'bottoms', or 'one-pieces'. Only return one of these three words as the response."
+                ],
+                [
+                    'role' => 'user',
+                    'content' => "Classify the clothing item: '$productName'"
+                ]
+                ]
+            ]);
+
+            return $response->json()['choices'][0]['message']['content'];
+
+        } catch (\Exception $e) {
+            Log::error("Error in getCategory: " . $e->getMessage());
+            return "unknown";
         }
     }
 

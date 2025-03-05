@@ -91,10 +91,11 @@ class TryOnRepository implements TryOnRepositoryInterface
                 "send_images_result" => $responseBody ?? null,
                 "send_images_status_code" => $statusCode,
             ];
-
-            CreateTryOnDataJob::dispatch($tryOnData);
-
+            
+            // CreateTryOnDataJob::dispatch($tryOnData);
+            
             $statusResult = $this->getImageStatus($tryOnData);
+            
             if ($statusResult['status'] == 'COMPLETED') {
                 $tryOn = $this->getGenerateImage($tryOnData);
                 return $tryOn;
@@ -154,17 +155,14 @@ class TryOnRepository implements TryOnRepositoryInterface
                 'Authorization' => 'Key ' . $this->tryOnServiceToken,
                 'Content-Type'  => 'application/json',
                 ])->get($statusUrl);
-
                 $statusCode = $response->status();
                 $responseBody = json_decode($response->body(), true);
-                
                 if (isset($responseBody['status']) && $responseBody['status'] === 'COMPLETED') {
-                UpdateTryOnDataJob::dispatch($tryOn['uuid'], [
-                    "status_result" => $responseBody ?? null,
-                    "status_request_status_code" => $statusCode,
-                ]);
-                
-                return $responseBody;
+                    // UpdateTryOnDataJob::dispatch($tryOn['uuid'], [
+                    //     "status_result" => $responseBody ?? null,
+                    //     "status_request_status_code" => $statusCode,
+                    // ]);
+                    return $responseBody;
                 }
 
                 sleep($interval);
@@ -187,13 +185,12 @@ class TryOnRepository implements TryOnRepositoryInterface
 
             $statusCode = $response->status();
             $responseBody = json_decode($response->body(), true);
+            // UpdateTryOnDataJob::dispatch($tryOn['uuid'], [
+            //     "generate_result" => $responseBody ?? null,
+            //     "generate_response_status_code" => $statusCode,
+            // ]);
 
-            UpdateTryOnDataJob::dispatch($tryOn['uuid'], [
-                "generate_result" => $responseBody ?? null,
-                "generate_response_status_code" => $statusCode,
-            ]);
-
-            return $tryOn;
+            return $responseBody;
         } catch (\Exception $e) {
             Log::error("Error in getGenerateImage: " . $e->getMessage());
             return null;

@@ -7,4 +7,5 @@ return [
     'try-on-token' => env('TRY_ON_SERVICE_TOKEN'),
     'try-on-api' => env('TRY_ON_SERVICE_API'),
     'file_model' => env('SPEECH_TEXTER_FILE_MODEL', 'App\Models\File'),
+    'use_file_model' => env('USE_FILE_MODEL', false),
 ];

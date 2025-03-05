@@ -21,6 +21,7 @@ class TryOnRepository implements TryOnRepositoryInterface
         $this->categoryIdentifierToken = config('try-on.category-identifier-token');    
         $this->tryOnServiceToken = config('try-on.try-on-token');
         $this->tryOnServiceApi = config('try-on.try-on-api');
+        $this->useFileModel = config('try-on.use_file_model');
     }
 
     /**
@@ -35,29 +36,38 @@ class TryOnRepository implements TryOnRepositoryInterface
         try {
             $category = $this->getCategory($parameters['message']['productTitle']);
             
-            $modelFile = $this->fileModel->where('url', $parameters['message']['image'])->first();
-            $garmentFile = $this->fileModel->where('url', $parameters['message']['productImage'])->first();
-            
-            if (!$modelFile) {
-                $modelFile = $this->fileModel->updateOrCreate(
-                    ['url' => $parameters['message']['image'], 'user_id' => $userId],
-                    ['format' => pathinfo(parse_url($parameters['message']['image'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
-                );
-            }
+            if (!$this->useFileModel) {
+                $modelFile = $this->fileModel->where('url', $parameters['message']['image'])->first();
+                $garmentFile = $this->fileModel->where('url', $parameters['message']['productImage'])->first();
 
-            if (!$garmentFile) {
-                $garmentFile = $this->fileModel->updateOrCreate(
-                    ['url' => $parameters['message']['productImage'], 'user_id' => $userId],
-                    ['format' => pathinfo(parse_url($parameters['message']['productImage'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
-                );
+                if (!$modelFile) {
+                    $modelFile = $this->fileModel->updateOrCreate(
+                        ['url' => $parameters['message']['image'], 'user_id' => $userId],
+                        ['format' => pathinfo(parse_url($parameters['message']['image'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
+                    );
+                }
+    
+                if (!$garmentFile) {
+                    $garmentFile = $this->fileModel->updateOrCreate(
+                        ['url' => $parameters['message']['productImage'], 'user_id' => $userId],
+                        ['format' => pathinfo(parse_url($parameters['message']['productImage'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
+                    );
+                }
+
+                $modelImage = $modelFile->url;
+                $garmentImage = $garmentFile->url;
+                
+            } else {
+                $modelImage = $parameters['message']['image'];
+                $garmentImage = $parameters['message']['productImage'];
             }
 
             $response = Http::withHeaders([
                 'Authorization' => 'Key ' . $this->tryOnServiceToken,
                 'Content-Type'  => 'application/json',
             ])->post($this->tryOnServiceApi, [
-                'model_image'       => $modelFile['url'],
-                'garment_image'     => $garmentFile['url'],
+                'model_image'       => $modelImage,
+                'garment_image'     => $garmentImage,
                 'category'          => $category,
                 'garment_photo_type'=> 'auto',
                 'nsfw_filter'       => true,

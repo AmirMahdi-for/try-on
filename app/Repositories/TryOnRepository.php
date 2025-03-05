@@ -37,18 +37,18 @@ class TryOnRepository implements TryOnRepositoryInterface
             $category = $this->getCategory($parameters['message']['productTitle']);
             
             if (!$this->useFileModel) {
-                $modelFile = $this->fileModel->where('url', $parameters['message']['image'])->first();
-                $garmentFile = $this->fileModel->where('url', $parameters['message']['productImage'])->first();
+                $modelFile = $this->fileModel::where('url', $parameters['message']['image'])->first();
+                $garmentFile = $this->fileModel::where('url', $parameters['message']['productImage'])->first();
 
                 if (!$modelFile) {
-                    $modelFile = $this->fileModel->updateOrCreate(
+                    $modelFile = $this->fileModel::updateOrCreate(
                         ['url' => $parameters['message']['image'], 'user_id' => $userId],
                         ['format' => pathinfo(parse_url($parameters['message']['image'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
                     );
                 }
     
                 if (!$garmentFile) {
-                    $garmentFile = $this->fileModel->updateOrCreate(
+                    $garmentFile = $this->fileModel::updateOrCreate(
                         ['url' => $parameters['message']['productImage'], 'user_id' => $userId],
                         ['format' => pathinfo(parse_url($parameters['message']['productImage'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
                     );
@@ -56,7 +56,7 @@ class TryOnRepository implements TryOnRepositoryInterface
 
                 $modelImage = $modelFile->url;
                 $garmentImage = $garmentFile->url;
-                
+
             } else {
                 $modelImage = $parameters['message']['image'];
                 $garmentImage = $parameters['message']['productImage'];

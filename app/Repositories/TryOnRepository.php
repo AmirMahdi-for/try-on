@@ -16,6 +16,7 @@ use TryOn\Repositories\Interfaces\TryOnRepositoryInterface;
 class TryOnRepository implements TryOnRepositoryInterface
 {
     public function __construct() {
+        $this->fileModel = config('try-on.file_model');
         $this->categoryIdentifierApi = config('try-on.category-identifier-api');
         $this->categoryIdentifierToken = config('try-on.category-identifier-token');    
         $this->tryOnServiceToken = config('try-on.try-on-token');
@@ -34,18 +35,18 @@ class TryOnRepository implements TryOnRepositoryInterface
         try {
             $category = $this->getCategory($parameters['message']['productTitle']);
             
-            $modelFile = File::where('url', $parameters['message']['image'])->first();
-            $garmentFile = File::where('url', $parameters['message']['productImage'])->first();
+            $modelFile = $this->fileModel->where('url', $parameters['message']['image'])->first();
+            $garmentFile = $this->fileModel->where('url', $parameters['message']['productImage'])->first();
             
             if (!$modelFile) {
-                $modelFile = File::updateOrCreate(
+                $modelFile = $this->fileModel->updateOrCreate(
                     ['url' => $parameters['message']['image'], 'user_id' => $userId],
                     ['format' => pathinfo(parse_url($parameters['message']['image'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
                 );
             }
 
             if (!$garmentFile) {
-                $garmentFile = File::updateOrCreate(
+                $garmentFile = $this->fileModel->updateOrCreate(
                     ['url' => $parameters['message']['productImage'], 'user_id' => $userId],
                     ['format' => pathinfo(parse_url($parameters['message']['productImage'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
                 );

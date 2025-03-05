@@ -9,8 +9,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use TryOn\Http\Requests\VoiceFileRequest;
-use App\Jobs\CreateTryOnDataJob;
-use App\Jobs\UpdateTryOnDataJob;
+use TryOn\Jobs\CreateTryOnDataJob;
+use TryOn\Jobs\UpdateTryOnDataJob;
 use TryOn\Repositories\Interfaces\TryOnRepositoryInterface;
 
 class TryOnRepository implements TryOnRepositoryInterface
@@ -85,8 +85,8 @@ class TryOnRepository implements TryOnRepositoryInterface
             $tryOnData = [
                 "uuid"   => $uuid,
                 "user_id" => $userId,
-                "model_file_id" => $modelFile->id,
-                "garment_file_id" => $garmentFile->id,
+                "model_file_id" => $modelFile->id ?? null,
+                "garment_file_id" => $garmentFile->id ?? null,
                 "category" => $category ?? null,
                 "send_images_result" => $responseBody ?? null,
                 "send_images_status_code" => $statusCode,

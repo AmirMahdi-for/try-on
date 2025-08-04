@@ -25,47 +25,23 @@ class TryOnRepository implements TryOnRepositoryInterface
     public function tryOn(int $userId, array $parameters)
     {
         try {
-            $category = $this->getCategory($parameters['message']['productTitle']);
-            
-            if (!$this->useFileModel) {
-                $modelFile = $this->fileModel::where('url', $parameters['message']['image'])->first();
-                $garmentFile = $this->fileModel::where('url', $parameters['message']['productImage'])->first();
-
-                if (!$modelFile) {
-                    $modelFile = $this->fileModel::updateOrCreate(
-                        ['url' => $parameters['message']['image'], 'user_id' => $userId],
-                        ['format' => pathinfo(parse_url($parameters['message']['image'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
-                    );
-                }
-    
-                if (!$garmentFile) {
-                    $garmentFile = $this->fileModel::updateOrCreate(
-                        ['url' => $parameters['message']['productImage'], 'user_id' => $userId],
-                        ['format' => pathinfo(parse_url($parameters['message']['productImage'], PHP_URL_PATH), PATHINFO_EXTENSION), 'type' => 'image', 'size' => null]
-                    );
-                }
-
-                $modelImage = $modelFile->url;
-                $garmentImage = $garmentFile->url;
-
-            } else {
-                $modelImage = $parameters['message']['image'];
-                $garmentImage = $parameters['message']['productImage'];
-            }
+            $modelImage = $parameters['message']['image'];
+            $garmentImage = $parameters['message']['productImage'];
 
             $response = Http::withHeaders([
                 'Authorization' => 'Key ' . $this->tryOnServiceToken,
                 'Content-Type'  => 'application/json',
             ])->post($this->tryOnServiceApi, [
-                'model_image'       => $modelImage,
-                'garment_image'     => $garmentImage,
-                'category'          => $category,
-                'garment_photo_type'=> 'auto',
-                'nsfw_filter'       => true,
-                'guidance_scale'    => 2,
-                'timesteps'         => 50,
-                'seed'              => 42,
-                'num_samples'       => 1,
+                'model_image'        => $modelImage,        
+                'garment_image'      => $garmentImage,      
+                'category'           => 'auto',
+                'mode'               => 'balanced',         
+                'garment_photo_type' => 'auto',             
+                'moderation_level'   => 'permissive',       
+                'seed'               => 42,                 
+                'num_samples'        => 1,                  
+                'segmentation_free'  => true,               
+                'output_format'      => 'png',              
             ]);
 
             $statusCode = $response->status();
@@ -76,15 +52,12 @@ class TryOnRepository implements TryOnRepositoryInterface
             $tryOnData = [
                 "uuid"   => $uuid,
                 "user_id" => $userId,
-                "model_file_id" => $modelFile->id ?? null,
-                "garment_file_id" => $garmentFile->id ?? null,
-                "category" => $category ?? null,
+                "model_file_id" => null, 
+                "garment_file_id" => null,
                 "send_images_result" => $responseBody ?? null,
                 "send_images_status_code" => $statusCode,
             ];
-            
-            // CreateTryOnDataJob::dispatch($tryOnData);
-            
+
             $statusResult = $this->getImageStatus($tryOnData);
             
             if ($statusResult['status'] == 'COMPLETED') {
@@ -104,56 +77,24 @@ class TryOnRepository implements TryOnRepositoryInterface
     * @param string $productName
     * @return string
     */
-    public function getCategory(string $productName)
-    {
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->categoryIdentifierToken,
-                'Content-Type' => 'application/json',
-            ])->post($this->categoryIdentifierApi, [
-                'model' => 'gpt-4o-mini',
-                'messages' => [
-                [
-                    'role' => 'system',
-                    'content' => "You are an AI assistant that categorizes clothing items into one of three categories: 'tops', 'bottoms', or 'one-pieces'. Only return one of these three words as the response."
-                ],
-                [
-                    'role' => 'user',
-                    'content' => "Classify the clothing item: '$productName'"
-                ]
-                ]
-            ]);
-
-            return $response->json()['choices'][0]['message']['content'];
-
-        } catch (\Exception $e) {
-            Log::error("Error in getCategory: " . $e->getMessage());
-            return "unknown";
-        }
-    }
 
     public function getImageStatus($tryOn) 
     {
         try {
             $maxTime = 600;
             $interval = 3; 
-            $elapsedTime = 0;
+            $elapsedTime   = 0;
 
-            $statusUrl = $tryOn['send_images_result']['status_url'];
+            $requestId = $tryOn['send_images_result']['request_id'];
             
             while ($elapsedTime < $maxTime) {
                 $response = Http::withHeaders([
-                'Authorization' => 'Key ' . $this->tryOnServiceToken,
-                'Content-Type'  => 'application/json',
-                ])->get($statusUrl);
-                $statusCode = $response->status();
-                $responseBody = json_decode($response->body(), true);
-                if (isset($responseBody['status']) && $responseBody['status'] === 'COMPLETED') {
-                    // UpdateTryOnDataJob::dispatch($tryOn['uuid'], [
-                    //     "status_result" => $responseBody ?? null,
-                    //     "status_request_status_code" => $statusCode,
-                    // ]);
-                    return $responseBody;
+                    'Authorization' => 'Key ' . $this->tryOnServiceToken,
+                ])->get("https://queue.fal.run/fal-ai/fashn/requests/$requestId/status");
+
+                $body = $response->json();
+                if (isset($body['status']) && $body['status'] === 'COMPLETED') {
+                    return $body;
                 }
 
                 sleep($interval);
@@ -167,20 +108,17 @@ class TryOnRepository implements TryOnRepositoryInterface
 
     public function getGenerateImage($tryOn) 
     {
+        $requestId = $tryOn['send_images_result']['request_id'];
         try {
-            $responseUrl = $tryOn['send_images_result']['response_url'];
+
             $response = Http::withHeaders([
                 'Authorization' => 'Key ' . $this->tryOnServiceToken,
                 'Content-Type'  => 'application/json',
-            ])->get($responseUrl);
+            ])->get("https://queue.fal.run/fal-ai/fashn/requests/$requestId");
 
             $statusCode = $response->status();
             $responseBody = json_decode($response->body(), true);
-            // UpdateTryOnDataJob::dispatch($tryOn['uuid'], [
-            //     "generate_result" => $responseBody ?? null,
-            //     "generate_response_status_code" => $statusCode,
-            // ]);
-
+         
             return $responseBody;
         } catch (\Exception $e) {
             Log::error("Error in getGenerateImage: " . $e->getMessage());

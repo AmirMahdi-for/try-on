@@ -2,9 +2,9 @@
 
 namespace TryOn\Providers;
 
-use TryOn\Repositories\Interfaces\TryOnRepositoryInterface;
-use TryOn\Repositories\TryOnRepository;
 use Illuminate\Support\ServiceProvider;
+use TryOn\Repositories\v1\Interfaces\TryOnRepositoryInterface;
+use TryOn\Repositories\v1\TryOnRepository;
 use TryOn\Repositories\v2\Interfaces\TryOnRepositoryInterface as TryOnRepositoryInterfaceV2;
 use TryOn\Repositories\v2\TryOnRepository as TryOnRepositoryV2;
 

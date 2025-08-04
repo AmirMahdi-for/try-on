@@ -1,6 +1,6 @@
 <?php
 
-namespace TryOn\Repositories;
+namespace TryOn\Repositories\v1;
 
 
 use Illuminate\Support\Facades\Cache;

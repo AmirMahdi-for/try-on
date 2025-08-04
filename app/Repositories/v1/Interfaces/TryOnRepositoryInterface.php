@@ -1,6 +1,6 @@
 <?php
 
-namespace TryOn\Repositories\Interfaces;
+namespace TryOn\Repositories\v1\Interfaces;
 
 interface TryOnRepositoryInterface
 {

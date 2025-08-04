@@ -5,6 +5,8 @@ namespace TryOn\Providers;
 use TryOn\Repositories\Interfaces\TryOnRepositoryInterface;
 use TryOn\Repositories\TryOnRepository;
 use Illuminate\Support\ServiceProvider;
+use TryOn\Repositories\v2\Interfaces\TryOnRepositoryInterface as TryOnRepositoryInterfaceV2;
+use TryOn\Repositories\v2\TryOnRepository as TryOnRepositoryV2;
 
 class TryOnServiceProvider extends ServiceProvider
 {
@@ -13,6 +15,8 @@ class TryOnServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../../config/try-on.php', 'try-on');
         
         $this->app->bind(TryOnRepositoryInterface::class, TryOnRepository::class);
+        $this->app->bind(TryOnRepositoryInterfaceV2::class, TryOnRepositoryV2::class);
+
     }
 
     public function boot(): void
